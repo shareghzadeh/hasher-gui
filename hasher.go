@@ -160,6 +160,10 @@ func main() {
 	input2 := widget.NewEntry()
 	result := widget.NewEntry()
 
+	// Labels
+
+	inputLabel := widget.NewLabel("Raw Text: ")
+
 	options := []string{"MD5", "HTML", "URL"}
 
 	myDropDown := widget.NewSelect(options, func(selected string) {})
@@ -202,35 +206,31 @@ func main() {
 				myWindow.Clipboard().SetContent(result.Text)
 			}
 			result.Text = input.Text
-
 			result.Refresh()
+		} else if input.Text != "" || input2.Text != "" {
+			if isHtmlEncode(input.Text) {
+				result.Text = html.UnescapeString(input.Text)
+				result.Refresh()
+			} else if isHtmlEncode(input2.Text) {
+				result.Text = html.UnescapeString(input2.Text)
+				result.Refresh()
+			} else if isUrlEncode(input.Text) {
+				result.Text, _ = url.QueryUnescape(input.Text)
+				result.Refresh()
+			} else if isUrlEncode(input2.Text) {
+				result.Text, _ = url.QueryUnescape(input2.Text)
+				result.Refresh()
+			}
 		} else {
 			result.Text = "NOT FOUND"
 			result.Refresh()
-		}
-
-		if isHtmlEncode(input.Text) {
-			result.Text = html.UnescapeString(input.Text)
-			result.Refresh()
-		} else {
-			result.Text = "NOT FOUND"
-			result.Refresh()
-
-		}
-		if isUrlEncode(input.Text) {
-			result.Text, _ = url.QueryUnescape(input.Text)
-			result.Refresh()
-		} else {
-			result.Text = "NOT FOUND"
-			result.Refresh()
-
 		}
 	})
 
 	input.SetPlaceHolder("Enter Your Text OR Your Encode Here")
 	input2.SetPlaceHolder("Enter Your Hash")
 
-	content := container.NewVBox(input, input2, myDropDown, encode, decode, result)
+	content := container.NewVBox(inputLabel, input, input2, myDropDown, encode, decode, result)
 
 	myWindow.SetContent(content)
 	myWindow.ShowAndRun()

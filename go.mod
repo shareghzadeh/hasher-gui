@@ -1,4 +1,4 @@
-module hasher
+module hasher-gui
 
 go 1.20
 
