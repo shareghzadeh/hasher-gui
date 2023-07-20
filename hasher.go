@@ -5,6 +5,8 @@ import (
 	"crypto/sha1"
 	"crypto/sha256"
 	"crypto/sha512"
+	"encoding/base32"
+	"encoding/base64"
 	"fmt"
 	"html"
 	"net/url"
@@ -16,6 +18,7 @@ import (
 )
 
 func main() {
+
 	myApp := app.New()
 	myWindow := myApp.NewWindow("Entry Widget")
 
@@ -49,6 +52,34 @@ func main() {
 			if result.Text != "Please Select Something" {
 				myWindow.Clipboard().SetContent(result.Text)
 			}
+		} else if myDropDown.SelectedIndex() == 3 {
+			result.Text = base32.StdEncoding.EncodeToString([]byte(input.Text))
+			if result.Text != "Please Select Something" {
+				myWindow.Clipboard().SetContent(result.Text)
+			}
+		} else if myDropDown.SelectedIndex() == 3 {
+			result.Text = base64.StdEncoding.EncodeToString([]byte(input.Text))
+			if result.Text != "Please Select Something" {
+				myWindow.Clipboard().SetContent(result.Text)
+			}
+		} else if myDropDown.SelectedIndex() == 5 {
+			result.Text = Sha1ToString(input.Text)
+			result.Refresh()
+			if result.Text != "Please Select Something" {
+				myWindow.Clipboard().SetContent(result.Text)
+			}
+		} else if myDropDown.SelectedIndex() == 6 {
+			result.Text = Sha256ToString(input.Text)
+			result.Refresh()
+			if result.Text != "Please Select Something" {
+				myWindow.Clipboard().SetContent(result.Text)
+			}
+		} else if myDropDown.SelectedIndex() == 7 {
+			result.Text = Sha512ToString(input.Text)
+			result.Refresh()
+			if result.Text != "Please Select Something" {
+				myWindow.Clipboard().SetContent(result.Text)
+			}
 		} else {
 			result.Text = "Please Select Something"
 			result.Refresh()
@@ -70,6 +101,24 @@ func main() {
 			}
 			result.Text = input.Text
 			result.Refresh()
+		} else if isSha1(input2.Text) && Sha1ToString(input.Text) == input2.Text {
+			if result.Text != "NOT FOUND" {
+				myWindow.Clipboard().SetContent(result.Text)
+			}
+			result.Text = input.Text
+			result.Refresh()
+		} else if isSha256(input2.Text) && Sha256ToString(input.Text) == input2.Text {
+			if result.Text != "NOT FOUND" {
+				myWindow.Clipboard().SetContent(result.Text)
+			}
+			result.Text = input.Text
+			result.Refresh()
+		} else if isSha512(input2.Text) && Sha512ToString(input.Text) == input2.Text {
+			if result.Text != "NOT FOUND" {
+				myWindow.Clipboard().SetContent(result.Text)
+			}
+			result.Text = input.Text
+			result.Refresh()
 		} else if input.Text != "" || input2.Text != "" {
 			if isHtmlEncode(input.Text) {
 				result.Text = html.UnescapeString(input.Text)
@@ -83,6 +132,9 @@ func main() {
 			} else if isUrlEncode(input2.Text) {
 				result.Text, _ = url.QueryUnescape(input2.Text)
 				result.Refresh()
+			} else {
+				result.Text = "NOT FOUND"
+				result.Refresh()
 			}
 		} else {
 			result.Text = "NOT FOUND"
@@ -90,7 +142,7 @@ func main() {
 		}
 	})
 
-	input.SetPlaceHolder("Enter Your Text OR Your Encode Here")
+	input.SetPlaceHolder("Enter Your Text")
 	input2.SetPlaceHolder("Enter Your Hash")
 
 	content := container.NewVBox(inputLabel, input, input2, myDropDown, encode, decode, result)
@@ -131,6 +183,33 @@ func isUrlEncode(s string) bool {
 	}
 	return true
 }
+func isSha1(s string) bool {
+	// Test URL-encoded pattern
+	sha1Pattern := "^[a-fA-F0-9]{40}$"
+	sha1Regex := regexp.MustCompile(sha1Pattern)
+	if !sha1Regex.MatchString(s) {
+		return false
+	}
+	return true
+}
+func isSha256(s string) bool {
+	// Test URL-encoded pattern
+	sha256Pattern := "^[a-fA-F0-9]{64}$"
+	sha256Regex := regexp.MustCompile(sha256Pattern)
+	if !sha256Regex.MatchString(s) {
+		return false
+	}
+	return true
+}
+func isSha512(s string) bool {
+	// Test URL-encoded pattern
+	sha512Pattern := "^[0-9a-fA-F]{128}$"
+	sha512Regex := regexp.MustCompile(sha512Pattern)
+	if !sha512Regex.MatchString(s) {
+		return false
+	}
+	return true
+}
 func md5ToString(a string) string {
 	// Text to byte
 	hash := md5.Sum([]byte(a))
@@ -139,7 +218,7 @@ func md5ToString(a string) string {
 	// return the md5 string
 	return hashToString
 }
-func sha1ToString(a string) string {
+func Sha1ToString(a string) string {
 	hash := sha1.New()
 	hash.Write([]byte(a))
 	hashBytes := hash.Sum(nil)
@@ -147,7 +226,7 @@ func sha1ToString(a string) string {
 	return hashToString
 }
 
-func sha256ToString(a string) string {
+func Sha256ToString(a string) string {
 	hash := sha256.New()
 	hash.Write([]byte(a))
 	hashBytes := hash.Sum(nil)
@@ -155,7 +234,7 @@ func sha256ToString(a string) string {
 	return hashToString
 }
 
-func sha512ToString(a string) string {
+func Sha512ToString(a string) string {
 	hash := sha512.New()
 	hash.Write([]byte(a))
 	hashBytes := hash.Sum(nil)
